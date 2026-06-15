@@ -1,1 +1,471 @@
-CREATE DATABASE 
+CREATE DATABASE cellfish
+USE cellfish
+
+------------
+--TABELAS NORMAIS
+------------
+
+CREATE TABLE TB_CF_PLANO 
+    (
+     id_plano INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_PLANO PRIMARY KEY (id_plano), 
+     nm_plano VARCHAR (30) NOT NULL , 
+     vl_plano DECIMAL (5,2) NOT NULL 
+    )
+
+------------
+
+CREATE TABLE TB_CF_USUARIO 
+    (
+     id_usuario INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_USUARIO PRIMARY KEY (id_usuario), 
+     nm_usuario VARCHAR (100) NOT NULL , 
+     ds_email VARCHAR (80) NOT NULL , 
+     nr_telefone VARCHAR (16) NOT NULL , 
+     nr_cpf CHAR (11) 
+        CONSTRAINT UN_USUARIO_NR_CPF UNIQUE(nr_cpf)
+    )
+------------
+
+CREATE TABLE TB_CF_CIDADE_ESTADO 
+    (
+     id_cidade_estado INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_CIDADE_ESTADO PRIMARY KEY (id_cidade_estado), 
+     nm_cidade VARCHAR (50) NOT NULL , 
+     sg_estado CHAR (2) NOT NULL 
+    )
+
+------------
+
+CREATE TABLE TB_CF_PEIXE 
+    (
+     id_peixe INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_PEIXE PRIMARY KEY (id_peixe), 
+     nm_peixe VARCHAR (50) NOT NULL , 
+     ds_caracteristica_peixe VARCHAR (100) NOT NULL , 
+     vl_pontuacao_padrao INTEGER NOT NULL , 
+     ft_url_imagem VARCHAR (255) NOT NULL 
+    )
+------------
+
+CREATE TABLE TB_CF_ITEM 
+    (
+     id_item INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_ITEM PRIMARY KEY (id_item), 
+     nm_item VARCHAR (20) NOT NULL , 
+     ds_item VARCHAR (50) NOT NULL , 
+     tp_item VARCHAR (20) NOT NULL 
+    )
+------------
+
+CREATE TABLE TB_CF_LUA 
+    (
+     id_lua INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_LUA PRIMARY KEY (id_lua), 
+     nm_fase_lua VARCHAR (15) NOT NULL , 
+     dt_fase_lua DATE NOT NULL 
+    )
+------------
+
+CREATE TABLE TB_CF_TEMPERATURA 
+    (
+     id_temperatura INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_TEMPERATURA PRIMARY KEY (id_temperatura), 
+     vl_temperatura DECIMAL (3,1) NOT NULL , 
+     vl_sensacao_termica DECIMAL (3,1) NOT NULL , 
+     dt_medicao_temperatura DATETIME NOT NULL 
+    )
+
+------------
+
+CREATE TABLE TB_CF_UMIDADE_AR 
+    (
+     id_umidade_ar INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_UMIDADE PRIMARY KEY (id_umidade_ar), 
+     vl_porcentagem_umidade INTEGER NOT NULL , 
+     dt_medicao_umidade DATETIME NOT NULL 
+    )
+------------
+
+CREATE TABLE TB_CF_VENTO 
+    (
+     id_vento INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_VENTO PRIMARY KEY (id_vento), 
+     vl_velocidade_vento DECIMAL (5,2) NOT NULL , 
+     dt_medicao_vento DATETIME NOT NULL 
+    )
+------------
+
+CREATE TABLE TB_CF_REGRA 
+    (
+     id_regra INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_REGRA PRIMARY KEY (id_regra), 
+     nm_regra VARCHAR (30) NOT NULL , 
+     ds_regra VARCHAR (100) NOT NULL 
+    )
+
+------------
+CREATE TABLE TB_CF_LOCAL 
+    (
+     id_local INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_LOCAL PRIMARY KEY (id_local), 
+     id_cidade_estado INTEGER NOT NULL 
+        CONSTRAINT FK_CIDADE_ESTADO_LOCAL FOREIGN KEY (id_cidade_estado)
+            REFERENCES TB_CF_CIDADE_ESTADO (id_cidade_estado), 
+     nm_local VARCHAR (30) NOT NULL , 
+     tp_local VARCHAR (30) NOT NULL , 
+     ds_local VARCHAR (50) NOT NULL , 
+     vl_latitude DECIMAL (9,6) NOT NULL , 
+     vl_longitude DECIMAL (9,6) NOT NULL 
+    )
+
+------------
+
+CREATE TABLE TB_CF_ASSINATURA 
+    (
+     id_assinatura INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_ASSINATURA PRIMARY KEY (id_assinatura), 
+     id_usuario INTEGER NOT NULL 
+        CONSTRAINT FK_USUARIO_ASSINATURA FOREIGN KEY (id_usuario)
+            REFERENCES TB_CF_USUARIO (id_usuario), 
+     id_plano INTEGER NOT NULL 
+        CONSTRAINT FK_PLANO_ASSINATURA FOREIGN KEY (id_plano)
+            REFERENCES TB_CF_PLANO (id_plano), 
+     dt_compra DATETIME NOT NULL , 
+     st_pagamento VARCHAR(9) NOT NULL 
+        CONSTRAINT CK_ASSINATURA_ST_PAGAMENTO CHECK(st_pagamento IN ('APROVADO', 'RECUSADO', 'PENDENTE')), 
+     ds_forma_pagamento VARCHAR (15) NOT NULL 
+    )
+    
+------------
+
+CREATE TABLE TB_CF_CAMPEONATO 
+    (
+     id_campeonato INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_CAMPEONATO PRIMARY KEY (id_campeonato), 
+     id_usuario INTEGER NOT NULL 
+     CONSTRAINT FK_USUARIO_CAMPEONATO FOREIGN KEY (id_usuario)
+        REFERENCES TB_CF_USUARIO (id_usuario), 
+     tp_campeonato CHAR (1) NOT NULL 
+        CONSTRAINT CK_CAMPEONATO_TP_CAMPEONATO CHECK(tp_campeonato IN ('P', 'A')), 
+     nm_campeonato VARCHAR (30) NOT NULL , 
+     ds_campeonato VARCHAR (100) NOT NULL , 
+     dt_inicio DATETIME NOT NULL 
+        CONSTRAINT DF_CAMPEONATO_DT_INICIO DEFAULT GETDATE(), 
+     dt_fim DATETIME NOT NULL 
+        CONSTRAINT CK_CAMPEONATO_DT_FIM CHECK(dt_fim > dt_inicio), 
+     id_local INTEGER NOT NULL
+        CONSTRAINT FK_LOCAL_CAMPEONATO FOREIGN KEY (id_local)
+            REFERENCES TB_CF_LOCAL (id_local)
+    )
+
+------------     
+
+CREATE TABLE TB_CF_CAMPEONATO_PROFISSIONAL 
+    (
+     id_campeonato INTEGER NOT NULL 
+        CONSTRAINT PK_CAMPEONATO_PROFISSIONAL PRIMARY KEY (id_campeonato),
+        CONSTRAINT PK_CAMPEONATO_CAMPEONATO_PROFISSIONAL FOREIGN KEY (id_campeonato)
+            REFERENCES TB_CF_CAMPEONATO (id_campeonato), 
+     vl_premio DECIMAL (6,2) NOT NULL , 
+     vl_pontuacao_extra INTEGER NOT NULL , 
+     in_revisao_automatica CHAR (1) NOT NULL 
+        CONSTRAINT CK_CAMPEONATO_PROFISSIONAL_IN_REVISAO_AUTOMATICA CHECK (in_revisao_automatica IN ('S','N')), 
+     url_transmissao VARCHAR (255) 
+    )
+
+------------
+
+CREATE TABLE TB_CF_CAPTURA 
+    (
+     id_captura INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_CAPTURA PRIMARY KEY (id_captura), 
+     id_usuario INTEGER NOT NULL 
+        CONSTRAINT FK_USUARIO_CAPTURA FOREIGN KEY (id_usuario)
+            REFERENCES TB_CF_USUARIO (id_usuario), 
+     id_peixe INTEGER NOT NULL 
+        CONSTRAINT FK_PEIXE_CAPTURA FOREIGN KEY (id_peixe)
+            REFERENCES TB_CF_PEIXE (id_peixe), 
+     id_local INTEGER NOT NULL 
+        CONSTRAINT FK_LOCAL_CAPTURA FOREIGN KEY (id_local)
+            REFERENCES TB_CF_LOCAL (id_local), 
+     dt_captura DATETIME NOT NULL 
+        CONSTRAINT DF_CAPTURA_DT_CAPTURA DEFAULT GETDATE(), 
+     vl_tamanho DECIMAL (4,1) NOT NULL , 
+     vl_peso DECIMAL (4,1) NOT NULL , 
+     ft_url_captura VARCHAR (255) NOT NULL 
+    )
+
+------------
+
+CREATE TABLE TB_CF_CONQUISTA 
+    (
+     id_conquista INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_CONQUISTA PRIMARY KEY (id_conquista), 
+     vl_bonus_conquista INTEGER NOT NULL , 
+     nm_conquista VARCHAR (30) NOT NULL , 
+     ds_conquista VARCHAR (50) NOT NULL , 
+     id_captura INTEGER NOT NULL
+        CONSTRAINT FK_CAPTURA_CONQUISTA FOREIGN KEY (id_captura)
+            REFERENCES TB_CF_CAPTURA (id_captura)
+    )
+
+------------
+
+CREATE TABLE TB_CF_DADO_METEOROLOGICO 
+    (
+     id_dado_meteorologico INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_DADO_METEOROLOGICO PRIMARY KEY (id_dado_meteorologico), 
+     id_local INTEGER NOT NULL 
+        CONSTRAINT FK_LOCAL_DADO_METEOROLOGICO FOREIGN KEY (id_local)
+            REFERENCES TB_CF_LOCAL (id_local), 
+     id_lua INTEGER NOT NULL 
+        CONSTRAINT FK_LUA_DADO_METEOROLOGICO FOREIGN KEY (id_lua)
+            REFERENCES TB_CF_LUA (id_lua), 
+     id_umidade_ar INTEGER NOT NULL 
+        CONSTRAINT FK_UMIDADE_AR_DADO_METEOROLOGICO FOREIGN KEY (id_umidade_ar)
+            REFERENCES TB_CF_UMIDADE_AR (id_umidade_ar), 
+     id_temperatura INTEGER NOT NULL 
+        CONSTRAINT FK_TEMPERATURA_DADO_METEOROLOGICO FOREIGN KEY (id_temperatura)
+            REFERENCES TB_CF_TEMPERATURA (id_temperatura), 
+     id_vento INTEGER NOT NULL
+        CONSTRAINT FK_VENTO_DADO_METEOROLOGICO FOREIGN KEY (id_vento)
+            REFERENCES TB_CF_VENTO (id_vento)
+    )
+
+------------
+
+CREATE TABLE TB_CF_DICA 
+    (
+     id_dica INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_DICA PRIMARY KEY (id_dica), 
+     nm_dica VARCHAR (50) NOT NULL , 
+     tp_dica VARCHAR (20) NOT NULL , 
+     ds_dica VARCHAR (150) NOT NULL , 
+     in_url_video_auxilio VARCHAR (255) 
+    )
+
+------------
+
+CREATE TABLE TB_CF_LOJA 
+    (
+     id_loja INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_LOJA PRIMARY KEY (id_loja), 
+     id_local INTEGER NOT NULL 
+        CONSTRAINT FK_LOCAL_LOJA FOREIGN KEY (id_local)
+            REFERENCES TB_CF_LOCAL (id_local), 
+     nm_loja VARCHAR (50) NOT NULL , 
+     ds_loja VARCHAR (50) NOT NULL , 
+     nr_cnpj VARCHAR (16) NOT NULL
+        CONSTRAINT UN_LOJA_NR_CNPJ UNIQUE(nr_cnpj)
+    )
+
+------------
+--ASSOCIATIVAS
+------------
+CREATE TABLE TB_CF_A_CAMPEONATO_REGRA 
+    (
+     id_regra INTEGER NOT NULL , 
+     id_campeonato INTEGER NOT NULL 
+    )
+
+ALTER TABLE TB_CF_A_CAMPEONATO_REGRA ADD CONSTRAINT PK_TB_CF_A_CAMPEONATO_REGRA PRIMARY KEY CLUSTERED (id_regra, id_campeonato)
+
+
+------------
+
+CREATE TABLE TB_CF_A_CAPTURA_CAMPEONATO 
+    (
+     id_campeonato INTEGER NOT NULL , 
+     id_captura INTEGER NOT NULL 
+    )
+
+ALTER TABLE TB_CF_A_CAPTURA_CAMPEONATO ADD CONSTRAINT PK_TB_CF_A_CAPTURA_CAMPEONATO PRIMARY KEY CLUSTERED (id_campeonato, id_captura)
+
+
+------------
+
+CREATE TABLE TB_CF_A_DICA_ITEM 
+    (
+     id_item INTEGER NOT NULL , 
+     id_dica INTEGER NOT NULL 
+    )
+
+ALTER TABLE TB_CF_A_DICA_ITEM ADD CONSTRAINT PK_TB_CF_A_DICA_ITEM PRIMARY KEY CLUSTERED (id_item, id_dica)
+
+------------
+
+CREATE TABLE TB_CF_A_LOJA_ITEM 
+    (
+     id_loja INTEGER NOT NULL , 
+     id_item INTEGER NOT NULL , 
+     vl_item DECIMAL (4,2) NOT NULL 
+    )
+
+ALTER TABLE TB_CF_A_LOJA_ITEM ADD CONSTRAINT PK_TB_CF_A_LOJA_ITEM PRIMARY KEY CLUSTERED (id_loja, id_item)
+
+------------
+
+CREATE TABLE TB_CF_A_MEMBROS 
+    (
+     id_usuario INTEGER NOT NULL , 
+     id_campeonato INTEGER NOT NULL 
+    )
+
+ALTER TABLE TB_CF_A_MEMBROS ADD CONSTRAINT PK_TB_CF_A_MEMBROS PRIMARY KEY CLUSTERED (id_usuario, id_campeonato)
+
+------------
+
+CREATE TABLE TB_CF_A_PEIXE_DICA 
+    (
+     id_dica INTEGER NOT NULL , 
+     id_peixe INTEGER NOT NULL 
+    )
+
+ALTER TABLE TB_CF_A_PEIXE_DICA ADD CONSTRAINT PK_TB_CF_A_PEIXE_DICA PRIMARY KEY CLUSTERED (id_dica, id_peixe)
+
+------------
+
+ALTER TABLE TB_CF_A_CAMPEONATO_REGRA 
+    ADD CONSTRAINT FK_TB_CF_A_CAMPEONATO_REGRA_TB_CF_CAMPEONATO FOREIGN KEY 
+    ( 
+     id_campeonato
+    ) 
+    REFERENCES TB_CF_CAMPEONATO 
+    ( 
+     id_campeonato 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_CAMPEONATO_REGRA 
+    ADD CONSTRAINT FK_TB_CF_A_CAMPEONATO_REGRA_TB_CF_REGRA FOREIGN KEY 
+    ( 
+     id_regra
+    ) 
+    REFERENCES TB_CF_REGRA 
+    ( 
+     id_regra 
+    ) 
+   
+------------
+
+ALTER TABLE TB_CF_A_CAPTURA_CAMPEONATO 
+    ADD CONSTRAINT FK_TB_CF_A_CAPTURA_CAMPEONATO_TB_CF_CAMPEONATO FOREIGN KEY 
+    ( 
+     id_campeonato
+    ) 
+    REFERENCES TB_CF_CAMPEONATO 
+    ( 
+     id_campeonato 
+    ) 
+ 
+------------
+
+ALTER TABLE TB_CF_A_CAPTURA_CAMPEONATO 
+    ADD CONSTRAINT FK_TB_CF_A_CAPTURA_CAMPEONATO_TB_CF_CAPTURA FOREIGN KEY 
+    ( 
+     id_captura
+    ) 
+    REFERENCES TB_CF_CAPTURA 
+    ( 
+     id_captura 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_DICA_ITEM 
+    ADD CONSTRAINT FK_TB_CF_A_DICA_ITEM_TB_CF_DICA FOREIGN KEY 
+    ( 
+     id_dica
+    ) 
+    REFERENCES TB_CF_DICA 
+    ( 
+     id_dica 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_DICA_ITEM 
+    ADD CONSTRAINT FK_TB_CF_A_DICA_ITEM_TB_CF_ITEM FOREIGN KEY 
+    ( 
+     id_item
+    ) 
+    REFERENCES TB_CF_ITEM 
+    ( 
+     id_item 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_LOJA_ITEM 
+    ADD CONSTRAINT FK_TB_CF_A_LOJA_ITEM_TB_CF_ITEM FOREIGN KEY 
+    ( 
+     id_item
+    ) 
+    REFERENCES TB_CF_ITEM 
+    ( 
+     id_item 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_LOJA_ITEM 
+    ADD CONSTRAINT FK_TB_CF_A_LOJA_ITEM_TB_CF_LOJA FOREIGN KEY 
+    ( 
+     id_loja
+    ) 
+    REFERENCES TB_CF_LOJA 
+    ( 
+     id_loja 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_MEMBROS 
+    ADD CONSTRAINT FK_TB_CF_A_MEMBROS_TB_CF_CAMPEONATO FOREIGN KEY 
+    ( 
+     id_campeonato
+    ) 
+    REFERENCES TB_CF_CAMPEONATO 
+    ( 
+     id_campeonato 
+    ) 
+
+------------
+
+ALTER TABLE TB_CF_A_MEMBROS 
+    ADD CONSTRAINT FK_TB_CF_A_MEMBROS_TB_CF_USUARIO FOREIGN KEY 
+    ( 
+     id_usuario
+    ) 
+    REFERENCES TB_CF_USUARIO 
+    ( 
+     id_usuario 
+    )
+
+------------
+
+ALTER TABLE TB_CF_A_PEIXE_DICA 
+    ADD CONSTRAINT FK_TB_CF_A_PEIXE_DICA_TB_CF_DICA FOREIGN KEY 
+    ( 
+     id_dica
+    ) 
+    REFERENCES TB_CF_DICA 
+    ( 
+     id_dica 
+    ) 
+    
+------------
+
+ALTER TABLE TB_CF_A_PEIXE_DICA 
+    ADD CONSTRAINT FK_TB_CF_A_PEIXE_DICA_TB_CF_PEIXE FOREIGN KEY 
+    ( 
+     id_peixe
+    ) 
+    REFERENCES TB_CF_PEIXE 
+    ( 
+     id_peixe 
+    ) 
+
+------------
