@@ -152,11 +152,11 @@ CREATE TABLE TB_CF_CAMPEONATO
      ds_campeonato VARCHAR (100) NOT NULL , 
      dt_inicio DATETIME NOT NULL 
         CONSTRAINT DF_CAMPEONATO_DT_INICIO DEFAULT GETDATE(), 
-     dt_fim DATETIME NOT NULL 
-        CONSTRAINT CK_CAMPEONATO_DT_FIM CHECK(dt_fim > dt_inicio), 
+     dt_fim DATETIME NOT NULL , 
      id_local INTEGER NOT NULL
         CONSTRAINT FK_LOCAL_CAMPEONATO FOREIGN KEY (id_local)
-            REFERENCES TB_CF_LOCAL (id_local)
+            REFERENCES TB_CF_LOCAL (id_local),
+    CONSTRAINT CK_CAMPEONATO_DT_FIM CHECK(dt_fim > dt_inicio)
     )
 
 ------------     
