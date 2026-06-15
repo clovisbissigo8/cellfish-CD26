@@ -253,7 +253,8 @@ CREATE TABLE TB_CF_LOJA
         CONSTRAINT PK_LOJA PRIMARY KEY (id_loja), 
      id_local INTEGER NOT NULL 
         CONSTRAINT FK_LOCAL_LOJA FOREIGN KEY (id_local)
-            REFERENCES TB_CF_LOCAL (id_local), 
+            REFERENCES TB_CF_LOCAL (id_local)
+        CONSTRAINT UN_LOJA_ID_LOCAL UNIQUE (id_loja), 
      nm_loja VARCHAR (50) NOT NULL , 
      ds_loja VARCHAR (50) NOT NULL , 
      nr_cnpj VARCHAR (16) NOT NULL
@@ -266,32 +267,39 @@ CREATE TABLE TB_CF_LOJA
 CREATE TABLE TB_CF_A_CAMPEONATO_REGRA 
     (
      id_regra INTEGER NOT NULL , 
-     id_campeonato INTEGER NOT NULL 
+     id_campeonato INTEGER NOT NULL,
+     CONSTRAINT PK_A_CAMPEONATO_REGRA PRIMARY KEY (id_regra, id_campeonato),
+     CONSTRAINT PK_REGRA_A_CAMPEONATO_REGRA FOREIGN KEY (id_regra)
+        REFERENCES TB_CF_REGRA (id_regra),
+     CONSTRAINT PK_CAMPEONATO_A_CAMPEONATO_REGRA FOREIGN KEY (id_campeonato)
+        REFERENCES TB_CF_CAMPEONATO (id_campeonato)
     )
-
-ALTER TABLE TB_CF_A_CAMPEONATO_REGRA ADD CONSTRAINT PK_TB_CF_A_CAMPEONATO_REGRA PRIMARY KEY CLUSTERED (id_regra, id_campeonato)
-
 
 ------------
 
 CREATE TABLE TB_CF_A_CAPTURA_CAMPEONATO 
     (
      id_campeonato INTEGER NOT NULL , 
-     id_captura INTEGER NOT NULL 
+     id_captura INTEGER NOT NULL,
+     CONSTRAINT PK_A_CAPTURA_CAMPEONATO PRIMARY KEY (id_captura, id_campeonato),
+     CONSTRAINT PK_CAPTURA_A_CAPTURA_CAMPEONATO FOREIGN KEY (id_captura)
+        REFERENCES TB_CF_CAPTURA (id_captura),
+     CONSTRAINT PK_CAMPEONATO_A_CAPTURA_CAMPEONATO FOREIGN KEY (id_campeonato)
+        REFERENCES TB_CF_CAMPEONATO (id_campeonato)
     )
-
-ALTER TABLE TB_CF_A_CAPTURA_CAMPEONATO ADD CONSTRAINT PK_TB_CF_A_CAPTURA_CAMPEONATO PRIMARY KEY CLUSTERED (id_campeonato, id_captura)
-
 
 ------------
 
 CREATE TABLE TB_CF_A_DICA_ITEM 
     (
      id_item INTEGER NOT NULL , 
-     id_dica INTEGER NOT NULL 
+     id_dica INTEGER NOT NULL ,
+     CONSTRAINT PK_A_DICA_ITEM PRIMARY KEY (id_item, id_dica),
+     CONSTRAINT PK_ITEM_A_DICA_ITEM FOREIGN KEY (id_item)
+        REFERENCES TB_CF_ITEM (id_item),
+     CONSTRAINT PK_DICA_A_DICA_ITEM FOREIGN KEY (id_dica)
+        REFERENCES TB_CF_DICA (id_dica)
     )
-
-ALTER TABLE TB_CF_A_DICA_ITEM ADD CONSTRAINT PK_TB_CF_A_DICA_ITEM PRIMARY KEY CLUSTERED (id_item, id_dica)
 
 ------------
 
@@ -299,173 +307,38 @@ CREATE TABLE TB_CF_A_LOJA_ITEM
     (
      id_loja INTEGER NOT NULL , 
      id_item INTEGER NOT NULL , 
-     vl_item DECIMAL (4,2) NOT NULL 
+     vl_item DECIMAL (4,2) NOT NULL ,
+     CONSTRAINT PK_A_LOJA_ITEM PRIMARY KEY (id_loja, id_item),
+     CONSTRAINT PK_LOJA_A_LOJA_ITEM FOREIGN KEY (id_loja)
+        REFERENCES TB_CF_LOJA (id_loja),
+     CONSTRAINT PK_ITEM_A_LOJA_ITEM FOREIGN KEY (id_item)
+            REFERENCES TB_CF_ITEM (id_item)
     )
-
-ALTER TABLE TB_CF_A_LOJA_ITEM ADD CONSTRAINT PK_TB_CF_A_LOJA_ITEM PRIMARY KEY CLUSTERED (id_loja, id_item)
 
 ------------
 
 CREATE TABLE TB_CF_A_MEMBROS 
     (
      id_usuario INTEGER NOT NULL , 
-     id_campeonato INTEGER NOT NULL 
+     id_campeonato INTEGER NOT NULL ,
+     CONSTRAINT PK_A_MEMBROS PRIMARY KEY (id_usuario, id_campeonato),
+     CONSTRAINT PK_USUARIO_A_MEMBROS FOREIGN KEY (id_usuario)
+        REFERENCES TB_CF_USUARIO (id_usuario),
+     CONSTRAINT PK_CAMPEOANTO_A_MEMBROS FOREIGN KEY (id_campeonato)
+            REFERENCES TB_CF_CAMPEONATO (id_campeonato)
     )
-
-ALTER TABLE TB_CF_A_MEMBROS ADD CONSTRAINT PK_TB_CF_A_MEMBROS PRIMARY KEY CLUSTERED (id_usuario, id_campeonato)
 
 ------------
 
 CREATE TABLE TB_CF_A_PEIXE_DICA 
     (
      id_dica INTEGER NOT NULL , 
-     id_peixe INTEGER NOT NULL 
+     id_peixe INTEGER NOT NULL ,
+     CONSTRAINT PK_A_PEIXE_DICA PRIMARY KEY (id_peixe, id_dica),
+     CONSTRAINT PK_PEIXE_A_PEIXE_DICA FOREIGN KEY (id_peixe)
+        REFERENCES TB_CF_PEIXE (id_peixe),
+     CONSTRAINT PK_DICA_A_PEIXE_DICA FOREIGN KEY (id_dica)
+        REFERENCES TB_CF_DICA (id_dica)
     )
-
-ALTER TABLE TB_CF_A_PEIXE_DICA ADD CONSTRAINT PK_TB_CF_A_PEIXE_DICA PRIMARY KEY CLUSTERED (id_dica, id_peixe)
-
-------------
-
-ALTER TABLE TB_CF_A_CAMPEONATO_REGRA 
-    ADD CONSTRAINT FK_TB_CF_A_CAMPEONATO_REGRA_TB_CF_CAMPEONATO FOREIGN KEY 
-    ( 
-     id_campeonato
-    ) 
-    REFERENCES TB_CF_CAMPEONATO 
-    ( 
-     id_campeonato 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_CAMPEONATO_REGRA 
-    ADD CONSTRAINT FK_TB_CF_A_CAMPEONATO_REGRA_TB_CF_REGRA FOREIGN KEY 
-    ( 
-     id_regra
-    ) 
-    REFERENCES TB_CF_REGRA 
-    ( 
-     id_regra 
-    ) 
-   
-------------
-
-ALTER TABLE TB_CF_A_CAPTURA_CAMPEONATO 
-    ADD CONSTRAINT FK_TB_CF_A_CAPTURA_CAMPEONATO_TB_CF_CAMPEONATO FOREIGN KEY 
-    ( 
-     id_campeonato
-    ) 
-    REFERENCES TB_CF_CAMPEONATO 
-    ( 
-     id_campeonato 
-    ) 
- 
-------------
-
-ALTER TABLE TB_CF_A_CAPTURA_CAMPEONATO 
-    ADD CONSTRAINT FK_TB_CF_A_CAPTURA_CAMPEONATO_TB_CF_CAPTURA FOREIGN KEY 
-    ( 
-     id_captura
-    ) 
-    REFERENCES TB_CF_CAPTURA 
-    ( 
-     id_captura 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_DICA_ITEM 
-    ADD CONSTRAINT FK_TB_CF_A_DICA_ITEM_TB_CF_DICA FOREIGN KEY 
-    ( 
-     id_dica
-    ) 
-    REFERENCES TB_CF_DICA 
-    ( 
-     id_dica 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_DICA_ITEM 
-    ADD CONSTRAINT FK_TB_CF_A_DICA_ITEM_TB_CF_ITEM FOREIGN KEY 
-    ( 
-     id_item
-    ) 
-    REFERENCES TB_CF_ITEM 
-    ( 
-     id_item 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_LOJA_ITEM 
-    ADD CONSTRAINT FK_TB_CF_A_LOJA_ITEM_TB_CF_ITEM FOREIGN KEY 
-    ( 
-     id_item
-    ) 
-    REFERENCES TB_CF_ITEM 
-    ( 
-     id_item 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_LOJA_ITEM 
-    ADD CONSTRAINT FK_TB_CF_A_LOJA_ITEM_TB_CF_LOJA FOREIGN KEY 
-    ( 
-     id_loja
-    ) 
-    REFERENCES TB_CF_LOJA 
-    ( 
-     id_loja 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_MEMBROS 
-    ADD CONSTRAINT FK_TB_CF_A_MEMBROS_TB_CF_CAMPEONATO FOREIGN KEY 
-    ( 
-     id_campeonato
-    ) 
-    REFERENCES TB_CF_CAMPEONATO 
-    ( 
-     id_campeonato 
-    ) 
-
-------------
-
-ALTER TABLE TB_CF_A_MEMBROS 
-    ADD CONSTRAINT FK_TB_CF_A_MEMBROS_TB_CF_USUARIO FOREIGN KEY 
-    ( 
-     id_usuario
-    ) 
-    REFERENCES TB_CF_USUARIO 
-    ( 
-     id_usuario 
-    )
-
-------------
-
-ALTER TABLE TB_CF_A_PEIXE_DICA 
-    ADD CONSTRAINT FK_TB_CF_A_PEIXE_DICA_TB_CF_DICA FOREIGN KEY 
-    ( 
-     id_dica
-    ) 
-    REFERENCES TB_CF_DICA 
-    ( 
-     id_dica 
-    ) 
-    
-------------
-
-ALTER TABLE TB_CF_A_PEIXE_DICA 
-    ADD CONSTRAINT FK_TB_CF_A_PEIXE_DICA_TB_CF_PEIXE FOREIGN KEY 
-    ( 
-     id_peixe
-    ) 
-    REFERENCES TB_CF_PEIXE 
-    ( 
-     id_peixe 
-    ) 
 
 ------------
