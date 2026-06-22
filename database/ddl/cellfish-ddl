@@ -109,6 +109,15 @@ CREATE TABLE TB_CF_VENTO
     )
 ------------
 
+CREATE TABLE TB_CF_CARACTERISTICA
+    (
+     id_caracteristica INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_CARACTERISTICA PRIMARY KEY (id_caracteristica), 
+     tp_caracteristica VARCHAR (20) NOT NULL , 
+     ds_caracteristica VARCHAR (100) NOT NULL 
+    )
+
+------------
 CREATE TABLE TB_CF_CIDADE 
     (
       id_cidade INTEGER NOT NULL IDENTITY(1,1)
@@ -305,6 +314,7 @@ CREATE TABLE TB_CF_LOJA
 ------------
 --ASSOCIATIVAS
 ------------
+
 CREATE TABLE TB_CF_A_CAMPEONATO_REGRA 
     (
      id_regra INTEGER NOT NULL , 
@@ -367,6 +377,18 @@ CREATE TABLE TB_CF_A_MEMBROS
         REFERENCES TB_CF_USUARIO (id_usuario),
      CONSTRAINT PK_CAMPEONATO_A_MEMBROS FOREIGN KEY (id_campeonato)
             REFERENCES TB_CF_CAMPEONATO (id_campeonato)
+    )
+------------
+
+CREATE TABLE TB_CF_A_PEIXE_CARACTERISTICA 
+    (
+     id_peixe INTEGER NOT NULL , 
+     id_caracteristica INTEGER NOT NULL ,
+     CONSTRAINT PK_A_PEIXE_CARACTERISTICA PRIMARY KEY (id_peixe, id_caracteristica),
+     CONSTRAINT PK_PEIXE_A_PEIXE_CARACTERISTICA KEY (id_peixe)
+        REFERENCES TB_CF_peixe (id_peixe),
+     CONSTRAINT PK_CARACTERISTICA_A_PEIXE_CARACTERISTICA FOREIGN KEY (id_caracteristica)
+        REFERENCES TB_CF_CARACTERISTICA (id_caracteristica)
     )
 
 ------------
