@@ -25,14 +25,25 @@ CREATE TABLE TB_CF_USUARIO
      nr_cpf CHAR (11) 
         CONSTRAINT UN_USUARIO_NR_CPF UNIQUE(nr_cpf)
     )
+
 ------------
 
-CREATE TABLE TB_CF_CIDADE_ESTADO 
+CREATE TABLE TB_CF_ESTADO 
     (
-     id_cidade_estado INTEGER NOT NULL IDENTITY(1,1)
-        CONSTRAINT PK_CIDADE_ESTADO PRIMARY KEY (id_cidade_estado), 
-     nm_cidade VARCHAR (50) NOT NULL , 
+     id_estado INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_ESTADO PRIMARY KEY (id_estado), 
+     nm_estado VARCHAR (20) NOT NULL , 
      sg_estado CHAR (2) NOT NULL 
+    )
+
+------------
+
+CREATE TABLE TB_CF_TIPO_LOGRADOURO 
+    (
+     id_tipo_logradouro INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_TIPO_LOGRADOURO PRIMARY KEY (id_tipo_logradouro), 
+     tp_logradouro VARCHAR (20) NOT NULL
+        CONSTRAINT UN_TIPO_LOGRADOURO_TP_LOGRADOURO UNIQUE(tp_logradouro)
     )
 
 ------------
@@ -42,10 +53,10 @@ CREATE TABLE TB_CF_PEIXE
      id_peixe INTEGER NOT NULL IDENTITY(1,1)
         CONSTRAINT PK_PEIXE PRIMARY KEY (id_peixe), 
      nm_peixe VARCHAR (50) NOT NULL , 
-     ds_caracteristica_peixe VARCHAR (100) NOT NULL , 
      vl_pontuacao_padrao INTEGER NOT NULL , 
      ft_url_imagem VARCHAR (255) NOT NULL 
     )
+
 ------------
 
 CREATE TABLE TB_CF_ITEM 
@@ -56,6 +67,7 @@ CREATE TABLE TB_CF_ITEM
      ds_item VARCHAR (50) NOT NULL , 
      tp_item VARCHAR (20) NOT NULL 
     )
+
 ------------
 
 CREATE TABLE TB_CF_LUA 
@@ -65,6 +77,7 @@ CREATE TABLE TB_CF_LUA
      nm_fase_lua VARCHAR (15) NOT NULL , 
      dt_fase_lua DATE NOT NULL 
     )
+
 ------------
 
 CREATE TABLE TB_CF_TEMPERATURA 
@@ -96,22 +109,51 @@ CREATE TABLE TB_CF_VENTO
     )
 ------------
 
-CREATE TABLE TB_CF_REGRA 
+CREATE TABLE TB_CF_CIDADE 
     (
-     id_regra INTEGER NOT NULL IDENTITY(1,1)
-        CONSTRAINT PK_REGRA PRIMARY KEY (id_regra), 
-     nm_regra VARCHAR (30) NOT NULL , 
-     ds_regra VARCHAR (100) NOT NULL 
-    )
+      id_cidade INTEGER NOT NULL IDENTITY(1,1)
+         CONSTRAINT PK_CIDADE PRIMARY KEY (id_cidade), 
+      id_estado INTEGER NOT NULL 
+         CONSTRAINT FK_ESTADO_CIDADE FOREIGN KEY (id_estado)
+             REFERENCES TB_CF_ESTADO (id_estado), 
+      nm_cidade VARCHAR (50) NOT NULL
+     )
 
 ------------
-CREATE TABLE TB_CF_LOCAL 
+
+CREATE TABLE TB_CF_BAIRRO
     (
-     id_local INTEGER NOT NULL IDENTITY(1,1)
-        CONSTRAINT PK_LOCAL PRIMARY KEY (id_local), 
-     id_cidade_estado INTEGER NOT NULL 
-        CONSTRAINT FK_CIDADE_ESTADO_LOCAL FOREIGN KEY (id_cidade_estado)
-            REFERENCES TB_CF_CIDADE_ESTADO (id_cidade_estado), 
+      id_bairro INTEGER NOT NULL IDENTITY(1,1)
+         CONSTRAINT PK_BAIRRO PRIMARY KEY (id_bairro), 
+      id_cidade INTEGER NOT NULL 
+         CONSTRAINT FK_CIDADE_BAIRRO FOREIGN KEY (id_cidade)
+             REFERENCES TB_CF_CIDADE (id_cidade), 
+      nm_bairro VARCHAR (50) NOT NULL
+     )
+
+------------
+
+CREATE TABLE TB_CF_LOGRADOURO
+    (
+      id_logradouro INTEGER NOT NULL IDENTITY(1,1)
+         CONSTRAINT PK_LOGRADOURO PRIMARY KEY (id_logradouro), 
+      id_bairro INTEGER NOT NULL 
+         CONSTRAINT FK_BAIRRO_LOGRADOURO FOREIGN KEY (id_bairro)
+             REFERENCES TB_CF_BAIRRO (id_bairro),
+      id_tipo_logradouro INTEGER NOT NULL
+         CONSTRAINT FK_TIPO_LOGRADOURO_LOGRADOURO FOREIGN KEY (id_tipo_logradouro)
+             REFERENCES TB_CF_TIPO_LOGRADOURO (id_tipo_logradouro),
+      nm_logradouro VARCHAR (50) NOT NULL
+     )
+
+------------
+CREATE TABLE TB_CF_LOCALIZACAO 
+    (
+     id_localizacao INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_LOCALIZACAO PRIMARY KEY (id_localizacao), 
+     id_logradouro INTEGER NOT NULL 
+        CONSTRAINT FK_LOGRADOURO_LOCALIZACAO FOREIGN KEY (id_logradouro)
+            REFERENCES TB_CF_LOGRADOURO (id_logradouro), 
      nm_local VARCHAR (30) NOT NULL , 
      tp_local VARCHAR (30) NOT NULL , 
      ds_local VARCHAR (50) NOT NULL , 
@@ -149,33 +191,32 @@ CREATE TABLE TB_CF_CAMPEONATO
      tp_campeonato CHAR (1) NOT NULL 
         CONSTRAINT CK_CAMPEONATO_TP_CAMPEONATO CHECK(tp_campeonato IN ('P', 'A')), 
      nm_campeonato VARCHAR (30) NOT NULL , 
-     ds_campeonato VARCHAR (100) NOT NULL , 
+     ds_campeonato VARCHAR (100) NOT NULL ,
+     vl_premio DECIMAL (6,2) NOT NULL , 
      dt_inicio DATETIME NOT NULL 
         CONSTRAINT DF_CAMPEONATO_DT_INICIO DEFAULT GETDATE(), 
      dt_fim DATETIME NOT NULL , 
      id_local INTEGER NOT NULL
         CONSTRAINT FK_LOCAL_CAMPEONATO FOREIGN KEY (id_local)
             REFERENCES TB_CF_LOCAL (id_local),
-    CONSTRAINT CK_CAMPEONATO_DT_FIM CHECK(dt_fim > dt_inicio)
+     url_transmissao VARCHAR (255), 
+     CONSTRAINT CK_CAMPEONATO_DT_FIM CHECK(dt_fim > dt_inicio)
     )
 
 ------------     
 
-CREATE TABLE TB_CF_CAMPEONATO_PROFISSIONAL 
+CREATE TABLE TB_CF_REGRA 
     (
-     id_campeonato INTEGER NOT NULL 
-        CONSTRAINT PK_CAMPEONATO_PROFISSIONAL PRIMARY KEY (id_campeonato),
-        CONSTRAINT PK_CAMPEONATO_CAMPEONATO_PROFISSIONAL FOREIGN KEY (id_campeonato)
-            REFERENCES TB_CF_CAMPEONATO (id_campeonato), 
-     vl_premio DECIMAL (6,2) NOT NULL , 
-     vl_pontuacao_extra INTEGER NOT NULL , 
-     in_revisao_automatica CHAR (1) NOT NULL 
-        CONSTRAINT CK_CAMPEONATO_PROFISSIONAL_IN_REVISAO_AUTOMATICA CHECK (in_revisao_automatica IN ('S','N')), 
-     url_transmissao VARCHAR (255) 
+     id_regra INTEGER NOT NULL IDENTITY(1,1)
+        CONSTRAINT PK_REGRA PRIMARY KEY (id_regra),
+     id_campeonato INTEGER NOT NULL
+        CONSTRAINT FK_CAMPEONATO_REGRA FOREIGN KEY (id_campeonato)
+            REFERENCES TB_CF_CAMPEONATO (id_campeonato)
+     nm_regra VARCHAR (30) NOT NULL , 
+     in_multiplicador INTEGER NOT NULL
     )
 
 ------------
-
 CREATE TABLE TB_CF_CAPTURA 
     (
      id_captura INTEGER NOT NULL IDENTITY(1,1)
@@ -324,7 +365,7 @@ CREATE TABLE TB_CF_A_MEMBROS
      CONSTRAINT PK_A_MEMBROS PRIMARY KEY (id_usuario, id_campeonato),
      CONSTRAINT PK_USUARIO_A_MEMBROS FOREIGN KEY (id_usuario)
         REFERENCES TB_CF_USUARIO (id_usuario),
-     CONSTRAINT PK_CAMPEOANTO_A_MEMBROS FOREIGN KEY (id_campeonato)
+     CONSTRAINT PK_CAMPEONATO_A_MEMBROS FOREIGN KEY (id_campeonato)
             REFERENCES TB_CF_CAMPEONATO (id_campeonato)
     )
 
