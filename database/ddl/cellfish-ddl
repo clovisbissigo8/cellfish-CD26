@@ -243,12 +243,12 @@ CREATE TABLE TB_CF_CONQUISTA
     (
      id_conquista INTEGER NOT NULL IDENTITY(1,1)
         CONSTRAINT PK_CONQUISTA PRIMARY KEY (id_conquista), 
+     id_captura INTEGER NOT NULL
+        CONSTRAINT FK_CAPTURA_CONQUISTA FOREIGN KEY (id_captura)
+            REFERENCES TB_CF_CAPTURA (id_captura),
      vl_bonus_conquista INTEGER NOT NULL , 
      nm_conquista VARCHAR (30) NOT NULL , 
      ds_conquista VARCHAR (50) NOT NULL , 
-     id_captura INTEGER NOT NULL
-        CONSTRAINT FK_CAPTURA_CONQUISTA FOREIGN KEY (id_captura)
-            REFERENCES TB_CF_CAPTURA (id_captura)
     )
 
 ------------
@@ -292,10 +292,10 @@ CREATE TABLE TB_CF_LOJA
     (
      id_loja INTEGER NOT NULL IDENTITY(1,1)
         CONSTRAINT PK_LOJA PRIMARY KEY (id_loja), 
-     id_local INTEGER NOT NULL 
-        CONSTRAINT FK_LOCAL_LOJA FOREIGN KEY (id_local)
+     id_localizacao INTEGER NOT NULL 
+        CONSTRAINT FK_LOCALIZACAO_LOJA FOREIGN KEY (id_localizacao)
             REFERENCES TB_CF_LOCAL (id_local)
-        CONSTRAINT UN_LOJA_ID_LOCAL UNIQUE (id_loja), 
+        CONSTRAINT UN_LOJA_ID_LOCALIZACAO UNIQUE (id_localizacao), 
      nm_loja VARCHAR (50) NOT NULL , 
      ds_loja VARCHAR (50) NOT NULL , 
      nr_cnpj VARCHAR (16) NOT NULL
